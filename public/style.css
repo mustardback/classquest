@@ -194,11 +194,13 @@ body {
     padding: 1rem;
     text-align: center;
     border: 2px solid var(--border);
+    position: relative;
 }
 
 .badge-card .badge-icon { font-size: 2rem; margin-bottom: 0.5rem; }
 .badge-card .badge-name { font-size: 0.8rem; font-weight: 500; }
 .badge-card .badge-date { font-size: 0.7rem; color: var(--text-muted); }
+.badge-card .revoke-btn { margin-top: 0.5rem; font-size: 0.65rem; padding: 0.2rem 0.5rem; }
 
 /* ===== Admin Panel ===== */
 .admin-tabs {

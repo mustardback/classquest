@@ -46,6 +46,8 @@ let editingStudentId = null;
 let editingAchievementId = null;
 let selectedAwardStudents = new Set();
 let selectedAwardAchievement = null;
+let recentAwards = [];
+let currentHeroStudentId = null;
 
 // ===== Auth =====
 auth.onAuthStateChanged(user => {
@@ -134,6 +136,19 @@ function initListeners() {
             renderAwardAchievements();
         });
 
+    // Listen to recent awards for ticker
+    db.collectionGroup('awards')
+        .orderBy('awardedAt', 'desc')
+        .limit(10)
+        .onSnapshot(snapshot => {
+            recentAwards = snapshot.docs.map(doc => ({
+                id: doc.id,
+                studentId: doc.ref.parent.parent.id,
+                ...doc.data()
+            }));
+            renderTicker();
+        });
+
     // Listen to class settings
     db.collection('classes').doc(classId).onSnapshot(doc => {
         if (doc.exists) {
@@ -159,6 +174,21 @@ function getLevelProgress(xp) {
     const currentThreshold = LEVEL_THRESHOLDS[level];
     const nextThreshold = LEVEL_THRESHOLDS[level + 1] || LEVEL_THRESHOLDS[level] + 1000;
     return ((xp - currentThreshold) / (nextThreshold - currentThreshold)) * 100;
+}
+
+function renderTicker() {
+    const ticker = document.getElementById('achievement-ticker');
+    if (!recentAwards.length) {
+        ticker.textContent = '✨ No quests completed yet — adventure awaits!';
+        return;
+    }
+    const items = recentAwards.map(award => {
+        const student = students.find(s => s.id === award.studentId);
+        const achievement = achievements.find(a => a.id === award.achievementId);
+        if (!student || !achievement) return '';
+        return `${achievement.icon} ${student.name} completed "${achievement.name}"!`;
+    }).filter(Boolean);
+    ticker.textContent = items.join('  ⚔️  ') || '✨ Adventure awaits!';
 }
 
 function renderAvatar(avatar, size = 80) {
@@ -220,6 +250,7 @@ function renderGuildHall() {
 async function showHeroProfile(studentId) {
     const student = students.find(s => s.id === studentId);
     if (!student) return;
+    currentHeroStudentId = studentId;
 
     const level = getLevel(student.xp || 0);
     const progress = getLevelProgress(student.xp || 0);
@@ -240,18 +271,53 @@ async function showHeroProfile(studentId) {
     const badges = awardsSnap.docs.map(doc => {
         const award = doc.data();
         const achievement = achievements.find(a => a.id === award.achievementId);
-        return { ...award, achievement };
+        return { id: doc.id, ...award, achievement };
     });
+
+    const isTeacher = !!currentUser;
 
     document.getElementById('hero-badges').innerHTML = badges.map(b => {
         const a = b.achievement;
         const date = b.awardedAt?.toDate?.() ? b.awardedAt.toDate().toLocaleDateString() : '';
+        const revokeBtn = isTeacher ? `<button class="btn btn-small btn-danger revoke-btn" data-award-id="${b.id}" data-xp="${a?.xpValue || 0}">✕ Revoke</button>` : '';
         return `<div class="badge-card">
             <div class="badge-icon">${a?.icon || '⭐'}</div>
             <div class="badge-name">${a?.name || 'Unknown'}</div>
             <div class="badge-date">${date}</div>
+            ${revokeBtn}
         </div>`;
     }).join('') || '<p style="color:var(--text-muted)">No quests completed yet!</p>';
+
+    // Attach revoke handlers
+    document.querySelectorAll('.revoke-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const awardId = btn.dataset.awardId;
+            const xpToRemove = parseInt(btn.dataset.xp) || 0;
+            if (!confirm('Revoke this achievement? XP will be deducted.')) return;
+
+            try {
+                const batch = db.batch();
+                const awardRef = db.collection('classes').doc(classId)
+                    .collection('students').doc(currentHeroStudentId)
+                    .collection('awards').doc(awardId);
+                batch.delete(awardRef);
+
+                if (xpToRemove > 0) {
+                    const studentRef = db.collection('classes').doc(classId)
+                        .collection('students').doc(currentHeroStudentId);
+                    batch.update(studentRef, { xp: firebase.firestore.FieldValue.increment(-xpToRemove) });
+                }
+
+                await batch.commit();
+                // Refresh the profile
+                showHeroProfile(currentHeroStudentId);
+            } catch (err) {
+                console.error('Revoke error:', err);
+                alert('Error revoking: ' + err.message);
+            }
+        });
+    });
 
     switchView('hero-profile');
 }
