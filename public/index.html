@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClassQuest - Guild Hall</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="top-nav">
+        <div class="nav-brand">⚔️ ClassQuest</div>
+        <div class="nav-links">
+            <button class="nav-btn active" data-view="guild-hall">🏰 Guild Hall</button>
+            <button class="nav-btn" data-view="quest-master" id="admin-nav-btn" style="display:none;">🗝️ Quest Master</button>
+        </div>
+        <div class="nav-auth">
+            <button class="btn btn-small" id="login-btn">🔐 Teacher Login</button>
+            <button class="btn btn-small" id="logout-btn" style="display:none;">👋 Logout</button>
+        </div>
+    </nav>
+
+    <!-- Guild Hall (Class View) -->
+    <section id="guild-hall" class="view active">
+        <div class="view-header">
+            <h1 id="class-name">⚔️ The Guild Hall</h1>
+            <div class="ticker" id="achievement-ticker"></div>
+        </div>
+        <div class="student-grid" id="student-grid">
+            <!-- Student cards rendered here -->
+        </div>
+    </section>
+
+    <!-- Hero Profile (Student View) -->
+    <section id="hero-profile" class="view">
+        <button class="btn btn-back" id="back-to-guild">← Back to Guild Hall</button>
+        <div class="hero-header">
+            <div class="hero-avatar-large" id="hero-avatar-large"></div>
+            <div class="hero-info">
+                <h1 id="hero-name">Hero Name</h1>
+                <div class="hero-level" id="hero-level">Level 1 — Villager</div>
+                <div class="xp-bar-large">
+                    <div class="xp-fill-large" id="hero-xp-fill"></div>
+                    <span class="xp-text-large" id="hero-xp-text">0 / 100 XP</span>
+                </div>
+            </div>
+        </div>
+        <div class="badge-collection">
+            <h2>🏆 Quest Log</h2>
+            <div class="badge-grid" id="hero-badges"></div>
+        </div>
+    </section>
+
+    <!-- Quest Master (Teacher Admin) -->
+    <section id="quest-master" class="view">
+        <div class="admin-tabs">
+            <button class="admin-tab active" data-tab="manage-students">👥 Students</button>
+            <button class="admin-tab" data-tab="manage-achievements">🎖️ Achievements</button>
+            <button class="admin-tab" data-tab="award-panel">🎁 Award</button>
+            <button class="admin-tab" data-tab="class-settings">⚙️ Settings</button>
+        </div>
+
+        <!-- Manage Students Tab -->
+        <div class="admin-panel active" id="manage-students">
+            <div class="panel-header">
+                <h2>👥 Manage Students</h2>
+                <button class="btn btn-primary" id="add-student-btn">+ Add Student</button>
+            </div>
+            <div class="student-list" id="admin-student-list"></div>
+        </div>
+
+        <!-- Manage Achievements Tab -->
+        <div class="admin-panel" id="manage-achievements">
+            <div class="panel-header">
+                <h2>🎖️ Manage Achievements</h2>
+                <button class="btn btn-primary" id="add-achievement-btn">+ Add Achievement</button>
+            </div>
+            <div class="achievement-list" id="admin-achievement-list"></div>
+        </div>
+
+        <!-- Award Panel Tab -->
+        <div class="admin-panel" id="award-panel">
+            <div class="panel-header">
+                <h2>🎁 Award Achievement</h2>
+            </div>
+            <div class="award-form">
+                <div class="award-section">
+                    <h3>Select Student(s)</h3>
+                    <button class="btn btn-small" id="select-all-students">Select All</button>
+                    <div class="award-student-grid" id="award-student-grid"></div>
+                </div>
+                <div class="award-section">
+                    <h3>Select Achievement</h3>
+                    <div class="award-achievement-grid" id="award-achievement-grid"></div>
+                </div>
+                <button class="btn btn-primary btn-large" id="award-btn" disabled>⚔️ Award!</button>
+            </div>
+        </div>
+
+        <!-- Class Settings Tab -->
+        <div class="admin-panel" id="class-settings">
+            <div class="panel-header">
+                <h2>⚙️ Class Settings</h2>
+            </div>
+            <div class="settings-form">
+                <label>Class Name
+                    <input type="text" id="settings-class-name" placeholder="Mrs. Johnson's 3rd Grade">
+                </label>
+                <button class="btn btn-primary" id="save-settings-btn">Save Settings</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Login Modal -->
+    <div class="modal" id="login-modal">
+        <div class="modal-content">
+            <h2>🔐 Quest Master Login</h2>
+            <form id="login-form">
+                <label>Email
+                    <input type="email" id="login-email" required>
+                </label>
+                <label>Password
+                    <input type="password" id="login-password" required>
+                </label>
+                <button type="submit" class="btn btn-primary">Enter</button>
+                <p class="error-msg" id="login-error"></p>
+            </form>
+            <button class="modal-close" id="close-login-modal">✕</button>
+        </div>
+    </div>
+
+    <!-- Add Student Modal -->
+    <div class="modal" id="student-modal">
+        <div class="modal-content modal-large">
+            <h2 id="student-modal-title">🗡️ New Adventurer</h2>
+            <form id="student-form">
+                <label>Name
+                    <input type="text" id="student-name" required placeholder="Enter student name">
+                </label>
+                <div class="avatar-builder">
+                    <h3>Build Avatar</h3>
+                    <div class="avatar-preview-container">
+                        <div class="avatar-preview" id="avatar-preview"></div>
+                    </div>
+                    <div class="avatar-options">
+                        <div class="option-group">
+                            <label>Skin Tone</label>
+                            <div class="swatch-row" id="skin-tone-swatches"></div>
+                        </div>
+                        <div class="option-group">
+                            <label>Hair Style</label>
+                            <div class="option-row" id="hair-style-options"></div>
+                        </div>
+                        <div class="option-group">
+                            <label>Hair Color</label>
+                            <div class="swatch-row" id="hair-color-swatches"></div>
+                        </div>
+                        <div class="option-group">
+                            <label>Eyes</label>
+                            <div class="option-row" id="eye-style-options"></div>
+                        </div>
+                        <div class="option-group">
+                            <label>Outfit</label>
+                            <div class="option-row" id="outfit-options"></div>
+                        </div>
+                        <div class="option-group">
+                            <label>Accent Color</label>
+                            <div class="swatch-row" id="accent-color-swatches"></div>
+                        </div>
+                        <div class="option-group">
+                            <label>Accessories</label>
+                            <div class="option-row" id="accessory-options"></div>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Adventurer</button>
+            </form>
+            <button class="modal-close" id="close-student-modal">✕</button>
+        </div>
+    </div>
+
+    <!-- Add Achievement Modal -->
+    <div class="modal" id="achievement-modal">
+        <div class="modal-content">
+            <h2 id="achievement-modal-title">🎖️ New Achievement</h2>
+            <form id="achievement-form">
+                <label>Name
+                    <input type="text" id="achievement-name" required placeholder="Dragon's Quiz">
+                </label>
+                <label>Description
+                    <input type="text" id="achievement-desc" placeholder="Score 100% on a quiz">
+                </label>
+                <label>Icon (emoji)
+                    <input type="text" id="achievement-icon" required placeholder="🐉" maxlength="4">
+                </label>
+                <label>XP Value
+                    <input type="number" id="achievement-xp" required value="50" min="1">
+                </label>
+                <label>Category
+                    <select id="achievement-category">
+                        <option value="academic">📚 Academic</option>
+                        <option value="behavior">⭐ Behavior</option>
+                        <option value="social">🤝 Social</option>
+                        <option value="effort">💪 Effort</option>
+                        <option value="special">✨ Special</option>
+                    </select>
+                </label>
+                <button type="submit" class="btn btn-primary">Save Achievement</button>
+            </form>
+            <button class="modal-close" id="close-achievement-modal">✕</button>
+        </div>
+    </div>
+
+    <!-- Confetti Canvas -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
