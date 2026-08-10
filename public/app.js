@@ -400,7 +400,8 @@ window.editStudent = function(id) {
 };
 
 window.deleteStudent = async function(id) {
-    if (!confirm('Remove this adventurer from the guild?')) return;
+    const student = students.find(s => s.id === id);
+    if (!confirm(`Remove ${student?.name || 'this adventurer'} from the guild?`)) return;
     await db.collection('classes').doc(classId).collection('students').doc(id).delete();
 };
 
