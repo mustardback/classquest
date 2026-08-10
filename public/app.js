@@ -579,16 +579,6 @@ function updateAwardButton() {
     btn.disabled = !(selectedAwardStudents.size > 0 && selectedAwardAchievement);
 }
 
-document.getElementById('select-all-students').addEventListener('click', () => {
-    if (selectedAwardStudents.size === students.length) {
-        selectedAwardStudents.clear();
-    } else {
-        students.forEach(s => selectedAwardStudents.add(s.id));
-    }
-    renderAwardStudents();
-    updateAwardButton();
-});
-
 document.getElementById('award-btn').addEventListener('click', async () => {
     if (!selectedAwardAchievement || selectedAwardStudents.size === 0) return;
 

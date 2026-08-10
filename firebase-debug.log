@@ -1,0 +1,51 @@
+[debug] [2026-08-10T20:38:44.993Z] ----------------------------------------------------------------------
+[debug] [2026-08-10T20:38:44.994Z] Command:       /Users/dlhawk/.local/share/mise/installs/node/20.20.2/bin/node /Users/dlhawk/.local/share/mise/installs/node/20.20.2/bin/firebase hosting:sites:create classquest --project classquest-app
+[debug] [2026-08-10T20:38:44.994Z] CLI Version:   15.26.0
+[debug] [2026-08-10T20:38:44.994Z] Platform:      darwin
+[debug] [2026-08-10T20:38:44.995Z] Node Version:  v20.20.2
+[debug] [2026-08-10T20:38:44.995Z] Detected Agent: unknown
+[debug] [2026-08-10T20:38:44.995Z] Time:          Mon Aug 10 2026 13:38:44 GMT-0700 (Pacific Daylight Time)
+[debug] [2026-08-10T20:38:44.995Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-08-10T20:38:45.082Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-08-10T20:38:45.082Z] > authorizing via signed-in user (dlhawkins0@gmail.com)
+[debug] [2026-08-10T20:38:45.082Z] [iam] checking project classquest-app for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-08-10T20:38:45.087Z] Checked if tokens are valid: true, expires at: 1786397384385
+[debug] [2026-08-10T20:38:45.087Z] Checked if tokens are valid: true, expires at: 1786397384385
+[debug] [2026-08-10T20:38:45.088Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/classquest-app:testIamPermissions [none]
+[debug] [2026-08-10T20:38:45.088Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/classquest-app:testIamPermissions  x-goog-user-project=classquest-app
+[debug] [2026-08-10T20:38:45.088Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/classquest-app:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-08-10T20:38:45.655Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/classquest-app:testIamPermissions 200
+[debug] [2026-08-10T20:38:45.655Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/classquest-app:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-08-10T20:38:45.657Z] Checked if tokens are valid: true, expires at: 1786397384385
+[debug] [2026-08-10T20:38:45.657Z] Checked if tokens are valid: true, expires at: 1786397384385
+[debug] [2026-08-10T20:38:45.657Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/classquest-app [none]
+[debug] [2026-08-10T20:38:45.809Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/classquest-app 200
+[debug] [2026-08-10T20:38:45.809Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/classquest-app {"projectNumber":"625338904774","projectId":"classquest-app","lifecycleState":"ACTIVE","name":"ClassQuest","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2026-08-10T18:42:06.392Z"}
+[debug] [2026-08-10T20:38:45.809Z] Checked if tokens are valid: true, expires at: 1786397384385
+[debug] [2026-08-10T20:38:45.809Z] Checked if tokens are valid: true, expires at: 1786397384385
+[debug] [2026-08-10T20:38:45.809Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/625338904774/sites siteId=classquest&validateOnly=true
+[debug] [2026-08-10T20:38:45.810Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/625338904774/sites {"appId":""}
+[debug] [2026-08-10T20:38:47.305Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/625338904774/sites 400
+[debug] [2026-08-10T20:38:47.305Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/625338904774/sites {"error":{"code":400,"message":"Invalid name: `classquest` is reserved by another project; try something like `classquest-c8892` instead","status":"FAILED_PRECONDITION"}}
+[warn] ⚠  Invalid name: `classquest` is reserved by another project; try something like `classquest-c8892` instead 
+[debug] [2026-08-10T20:38:55.136Z] Checked if tokens are valid: true, expires at: 1786397384385
+[debug] [2026-08-10T20:38:55.136Z] Checked if tokens are valid: true, expires at: 1786397384385
+[debug] [2026-08-10T20:38:55.137Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/625338904774/sites siteId=classquest&validateOnly=true
+[debug] [2026-08-10T20:38:55.137Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/625338904774/sites {"appId":""}
+[debug] [2026-08-10T20:38:56.455Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/625338904774/sites 400
+[debug] [2026-08-10T20:38:56.455Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/625338904774/sites {"error":{"code":400,"message":"Invalid name: `classquest` is reserved by another project; try something like `classquest-bf1c0` instead","status":"FAILED_PRECONDITION"}}
+[warn] ⚠  Invalid name: `classquest` is reserved by another project; try something like `classquest-bf1c0` instead 
+[debug] [2026-08-10T20:39:01.785Z] ExitPromptError: User force closed the prompt with SIGINT
+    at Interface.sigint (/Users/dlhawk/.local/share/mise/installs/node/20.20.2/lib/node_modules/firebase-tools/node_modules/@inquirer/core/dist/commonjs/lib/create-prompt.js:101:37)
+    at Interface.emit (node:events:524:28)
+    at [_ttyWrite] [as _ttyWrite] (node:internal/readline/interface:1134:18)
+    at ReadStream.onkeypress (node:internal/readline/interface:267:20)
+    at ReadStream.emit (node:events:536:35)
+    at emitKeys (node:internal/readline/utils:371:14)
+    at emitKeys.next (<anonymous>)
+    at ReadStream.onData (node:internal/readline/emitKeypressEvents:64:36)
+    at ReadStream.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)
+[error] 
+[error] Error: An unexpected error has occurred.
