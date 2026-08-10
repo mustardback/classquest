@@ -1,1 +1,15 @@
-{"projects":{"default":"classquest-app"}}
+{
+  "projects": {
+    "default": "classquest-app"
+  },
+  "targets": {
+    "classquest-app": {
+      "hosting": {
+        "classquest": [
+          "classquest"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
