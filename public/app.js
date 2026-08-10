@@ -307,6 +307,13 @@ document.getElementById('student-form').addEventListener('submit', async (e) => 
     const name = document.getElementById('student-name').value.trim();
     if (!name) return;
 
+    // Check for duplicate names
+    const duplicate = students.find(s => s.name.toLowerCase() === name.toLowerCase() && s.id !== editingStudentId);
+    if (duplicate) {
+        alert('⚠️ An adventurer with that name already exists! Please choose a unique name.');
+        return;
+    }
+
     const data = { name, avatar: { ...currentAvatar } };
 
     try {
