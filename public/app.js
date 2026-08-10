@@ -274,7 +274,24 @@ async function showHeroProfile(studentId) {
         return { id: doc.id, ...award, achievement };
     });
 
+    // Render active power-ups
+    const activePowerUps = badges.filter(b => b.achievement?.powerUp && b.powerUpRedeemed === false);
     const isTeacher = !!currentUser;
+
+    document.getElementById('hero-powerups').innerHTML = activePowerUps.length ? activePowerUps.map(b => {
+        const a = b.achievement;
+        const redeemBtn = isTeacher ? `<button class="btn btn-small redeem-btn" data-award-id="${b.id}">✓ Use</button>` : '';
+        return `<div class="powerup-card">
+            <div class="powerup-info">
+                <div class="powerup-icon">⚡</div>
+                <div>
+                    <div class="powerup-text">${a.powerUp}</div>
+                    <div class="powerup-source">From: ${a.icon} ${a.name}</div>
+                </div>
+            </div>
+            ${redeemBtn}
+        </div>`;
+    }).join('') : '<p style="color:var(--text-muted)">No active power-ups.</p>';
 
     document.getElementById('hero-badges').innerHTML = badges.map(b => {
         const a = b.achievement;
@@ -310,11 +327,30 @@ async function showHeroProfile(studentId) {
                 }
 
                 await batch.commit();
-                // Refresh the profile
                 showHeroProfile(currentHeroStudentId);
             } catch (err) {
                 console.error('Revoke error:', err);
                 alert('Error revoking: ' + err.message);
+            }
+        });
+    });
+
+    // Attach redeem/use power-up handlers
+    document.querySelectorAll('.redeem-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const awardId = btn.dataset.awardId;
+            if (!confirm('Mark this power-up as used?')) return;
+
+            try {
+                await db.collection('classes').doc(classId)
+                    .collection('students').doc(currentHeroStudentId)
+                    .collection('awards').doc(awardId)
+                    .update({ powerUpRedeemed: true });
+                showHeroProfile(currentHeroStudentId);
+            } catch (err) {
+                console.error('Redeem error:', err);
+                alert('Error redeeming: ' + err.message);
             }
         });
     });
@@ -429,6 +465,7 @@ document.getElementById('add-achievement-btn').addEventListener('click', () => {
     document.getElementById('achievement-icon').value = '';
     document.getElementById('achievement-xp').value = 50;
     document.getElementById('achievement-category').value = 'academic';
+    document.getElementById('achievement-powerup').value = '';
     document.getElementById('achievement-modal').classList.add('active');
 });
 
@@ -446,6 +483,7 @@ window.editAchievement = function(id) {
     document.getElementById('achievement-icon').value = a.icon;
     document.getElementById('achievement-xp').value = a.xpValue;
     document.getElementById('achievement-category').value = a.category || 'academic';
+    document.getElementById('achievement-powerup').value = a.powerUp || '';
     document.getElementById('achievement-modal').classList.add('active');
 };
 
@@ -486,7 +524,8 @@ document.getElementById('achievement-form').addEventListener('submit', async (e)
         description: document.getElementById('achievement-desc').value.trim(),
         icon,
         xpValue,
-        category: document.getElementById('achievement-category').value
+        category: document.getElementById('achievement-category').value,
+        powerUp: document.getElementById('achievement-powerup').value.trim()
     };
 
     try {
@@ -568,10 +607,14 @@ document.getElementById('award-btn').addEventListener('click', async () => {
         const awardRef = db.collection('classes').doc(classId)
             .collection('students').doc(studentId)
             .collection('awards').doc();
-        batch.set(awardRef, {
+        const awardData = {
             achievementId: selectedAwardAchievement,
             awardedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        };
+        if (achievement.powerUp) {
+            awardData.powerUpRedeemed = false;
+        }
+        batch.set(awardRef, awardData);
 
         const studentRef = db.collection('classes').doc(classId).collection('students').doc(studentId);
         batch.update(studentRef, { xp: firebase.firestore.FieldValue.increment(achievement.xpValue) });

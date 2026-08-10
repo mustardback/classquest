@@ -46,6 +46,10 @@
                 </div>
             </div>
         </div>
+        <div class="powerups-section">
+            <h2>⚡ Active Power-Ups</h2>
+            <div class="powerup-list" id="hero-powerups"></div>
+        </div>
         <div class="badge-collection">
             <h2>🏆 Quest Log</h2>
             <div class="badge-grid" id="hero-badges"></div>
@@ -210,6 +214,9 @@
                         <option value="effort">💪 Effort</option>
                         <option value="special">✨ Special</option>
                     </select>
+                </label>
+                <label>Power-Up (optional)
+                    <input type="text" id="achievement-powerup" placeholder="e.g. +5 points on next quiz, 1 free letter in spelling bee">
                 </label>
                 <button type="submit" class="btn btn-primary">Save Achievement</button>
             </form>
