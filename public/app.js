@@ -304,8 +304,15 @@ window.deleteStudent = async function(id) {
 
 document.getElementById('student-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const name = document.getElementById('student-name').value.trim();
+    let name = document.getElementById('student-name').value.trim();
     if (!name) return;
+
+    // Strip special characters (allow letters, numbers, spaces, hyphens, apostrophes)
+    name = name.replace(/[^a-zA-Z0-9\s\-']/g, '').trim();
+    if (!name) {
+        alert('⚠️ Name contains only special characters. Please enter a valid name.');
+        return;
+    }
 
     // Check for duplicate names
     const duplicate = students.find(s => s.name.toLowerCase() === name.toLowerCase() && s.id !== editingStudentId);
@@ -383,21 +390,50 @@ window.deleteAchievement = async function(id) {
 
 document.getElementById('achievement-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    const name = document.getElementById('achievement-name').value.trim();
+    const icon = document.getElementById('achievement-icon').value.trim();
+    const xpValue = parseInt(document.getElementById('achievement-xp').value);
+
+    // Validate required fields
+    if (!name) {
+        alert('⚠️ Achievement name is required.');
+        return;
+    }
+    if (!icon) {
+        alert('⚠️ Achievement icon is required. Pick an emoji!');
+        return;
+    }
+    if (!xpValue || xpValue < 1) {
+        alert('⚠️ XP value must be at least 1.');
+        return;
+    }
+
+    // Strip special characters from name (allow letters, numbers, spaces, hyphens, apostrophes)
+    const cleanName = name.replace(/[^a-zA-Z0-9\s\-'!?]/g, '').trim();
+    if (!cleanName) {
+        alert('⚠️ Achievement name contains only special characters.');
+        return;
+    }
+
     const data = {
-        name: document.getElementById('achievement-name').value.trim(),
+        name: cleanName,
         description: document.getElementById('achievement-desc').value.trim(),
-        icon: document.getElementById('achievement-icon').value.trim(),
-        xpValue: parseInt(document.getElementById('achievement-xp').value),
+        icon,
+        xpValue,
         category: document.getElementById('achievement-category').value
     };
 
-    if (editingAchievementId) {
-        await db.collection('classes').doc(classId).collection('achievements').doc(editingAchievementId).update(data);
-    } else {
-        await db.collection('classes').doc(classId).collection('achievements').add(data);
+    try {
+        if (editingAchievementId) {
+            await db.collection('classes').doc(classId).collection('achievements').doc(editingAchievementId).update(data);
+        } else {
+            await db.collection('classes').doc(classId).collection('achievements').add(data);
+        }
+        document.getElementById('achievement-modal').classList.remove('active');
+    } catch (err) {
+        console.error('Save achievement error:', err);
+        alert('Error saving: ' + err.message);
     }
-
-    document.getElementById('achievement-modal').classList.remove('active');
 });
 
 // ===== Award Panel =====
@@ -454,6 +490,12 @@ document.getElementById('award-btn').addEventListener('click', async () => {
     const achievement = achievements.find(a => a.id === selectedAwardAchievement);
     if (!achievement) return;
 
+    // Confirm bulk awards
+    if (selectedAwardStudents.size > 1) {
+        const confirmMsg = `Award "${achievement.icon} ${achievement.name}" (+${achievement.xpValue} XP) to ${selectedAwardStudents.size} students?`;
+        if (!confirm(confirmMsg)) return;
+    }
+
     const batch = db.batch();
 
     for (const studentId of selectedAwardStudents) {
@@ -469,13 +511,18 @@ document.getElementById('award-btn').addEventListener('click', async () => {
         batch.update(studentRef, { xp: firebase.firestore.FieldValue.increment(achievement.xpValue) });
     }
 
-    await batch.commit();
-    fireConfetti();
-    selectedAwardStudents.clear();
-    selectedAwardAchievement = null;
-    renderAwardStudents();
-    renderAwardAchievements();
-    updateAwardButton();
+    try {
+        await batch.commit();
+        fireConfetti();
+        selectedAwardStudents.clear();
+        selectedAwardAchievement = null;
+        renderAwardStudents();
+        renderAwardAchievements();
+        updateAwardButton();
+    } catch (err) {
+        console.error('Award error:', err);
+        alert('Error awarding: ' + err.message);
+    }
 });
 
 // ===== Class Settings =====
