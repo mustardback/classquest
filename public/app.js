@@ -309,15 +309,19 @@ document.getElementById('student-form').addEventListener('submit', async (e) => 
 
     const data = { name, avatar: { ...currentAvatar } };
 
-    if (editingStudentId) {
-        await db.collection('classes').doc(classId).collection('students').doc(editingStudentId).update(data);
-    } else {
-        data.xp = 0;
-        data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-        await db.collection('classes').doc(classId).collection('students').add(data);
+    try {
+        if (editingStudentId) {
+            await db.collection('classes').doc(classId).collection('students').doc(editingStudentId).update(data);
+        } else {
+            data.xp = 0;
+            data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+            await db.collection('classes').doc(classId).collection('students').add(data);
+        }
+        document.getElementById('student-modal').classList.remove('active');
+    } catch (err) {
+        console.error('Save student error:', err);
+        alert('Error saving: ' + err.message);
     }
-
-    document.getElementById('student-modal').classList.remove('active');
 });
 
 // ===== Admin: Achievements =====

@@ -7,6 +7,9 @@
       "hosting": {
         "classquest": [
           "classquest"
+        ],
+        "original": [
+          "classquest-app-c8dbe"
         ]
       }
     }
