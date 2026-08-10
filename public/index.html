@@ -51,6 +51,10 @@
             <h2>⚡ Active Power-Ups</h2>
             <div class="powerup-list" id="hero-powerups"></div>
         </div>
+        <div class="inventory-section">
+            <h2>🎒 Inventory</h2>
+            <div class="inventory-grid" id="hero-inventory"></div>
+        </div>
         <div class="badge-collection">
             <h2>🏆 Quest Log</h2>
             <div class="badge-grid" id="hero-badges"></div>
@@ -62,7 +66,9 @@
         <div class="admin-tabs">
             <button class="admin-tab active" data-tab="manage-students">👥 Students</button>
             <button class="admin-tab" data-tab="manage-achievements">🎖️ Achievements</button>
+            <button class="admin-tab" data-tab="manage-items">🎒 Loot</button>
             <button class="admin-tab" data-tab="award-panel">🎁 Award</button>
+            <button class="admin-tab" data-tab="award-item-panel">🎒 Give Loot</button>
             <button class="admin-tab" data-tab="class-settings">⚙️ Settings</button>
         </div>
 
@@ -99,6 +105,33 @@
                     <div class="award-achievement-grid" id="award-achievement-grid"></div>
                 </div>
                 <button class="btn btn-primary btn-large" id="award-btn" disabled>⚔️ Award!</button>
+            </div>
+        </div>
+
+        <!-- Manage Items Tab -->
+        <div class="admin-panel" id="manage-items">
+            <div class="panel-header">
+                <h2>🎒 Manage Loot</h2>
+                <button class="btn btn-primary" id="add-item-btn">+ Add Item</button>
+            </div>
+            <div class="item-list" id="admin-item-list"></div>
+        </div>
+
+        <!-- Award Item Panel Tab -->
+        <div class="admin-panel" id="award-item-panel">
+            <div class="panel-header">
+                <h2>🎒 Give Loot</h2>
+            </div>
+            <div class="award-form">
+                <div class="award-section">
+                    <h3>Select Student(s)</h3>
+                    <div class="award-student-grid" id="award-item-student-grid"></div>
+                </div>
+                <div class="award-section">
+                    <h3>Select Item</h3>
+                    <div class="award-achievement-grid" id="award-item-grid"></div>
+                </div>
+                <button class="btn btn-primary btn-large" id="award-item-btn" disabled>🎒 Give Loot!</button>
             </div>
         </div>
 
@@ -221,6 +254,29 @@
                 <button type="submit" class="btn btn-primary">Save Achievement</button>
             </form>
             <button class="modal-close" id="close-achievement-modal">✕</button>
+        </div>
+    </div>
+
+    <!-- Add Item Modal -->
+    <div class="modal" id="item-modal">
+        <div class="modal-content">
+            <h2 id="item-modal-title">🎒 New Loot Item</h2>
+            <form id="item-form">
+                <label>Name
+                    <input type="text" id="item-name" required placeholder="Dragon Shield">
+                </label>
+                <label>Icon (emoji)
+                    <input type="text" id="item-icon" required placeholder="🛡️" maxlength="4">
+                </label>
+                <label>Description
+                    <input type="text" id="item-desc" placeholder="Awarded for perfect attendance">
+                </label>
+                <label>Permanent Benefit (optional)
+                    <input type="text" id="item-benefit" placeholder="e.g. +1 retry on any test">
+                </label>
+                <button type="submit" class="btn btn-primary">Save Item</button>
+            </form>
+            <button class="modal-close" id="close-item-modal">✕</button>
         </div>
     </div>
 

@@ -203,6 +203,39 @@ body {
 .powerup-card .powerup-text { font-size: 0.85rem; font-weight: 500; }
 .powerup-card .powerup-source { font-size: 0.7rem; color: var(--text-muted); }
 .powerup-card .redeem-btn { font-size: 0.75rem; }
+
+/* Inventory/Equipment */
+.inventory-section { margin-bottom: 2rem; }
+.inventory-section h2 { margin-bottom: 1rem; }
+.inventory-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.item-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 1rem;
+    text-align: center;
+    border: 2px solid var(--border);
+    position: relative;
+}
+
+.item-card.equipped { border-color: var(--secondary); background: rgba(245,158,11,0.1); }
+.item-card .item-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+.item-card .item-name { font-size: 0.8rem; font-weight: 500; }
+.item-card .item-benefit { font-size: 0.7rem; color: var(--secondary); margin-top: 0.25rem; }
+.item-card .item-actions { margin-top: 0.5rem; display: flex; gap: 0.25rem; justify-content: center; }
+.item-card .equipped-badge { position: absolute; top: 0.3rem; right: 0.3rem; font-size: 0.6rem; background: var(--secondary); color: white; padding: 0.1rem 0.3rem; border-radius: 4px; }
+
+.student-card .equipped-items {
+    display: flex;
+    justify-content: center;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+    font-size: 1.2rem;
+}
 .badge-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));

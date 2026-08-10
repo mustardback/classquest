@@ -48,6 +48,10 @@ let selectedAwardStudents = new Set();
 let selectedAwardAchievement = null;
 let recentAwards = [];
 let currentHeroStudentId = null;
+let items = [];
+let selectedAwardItemStudents = new Set();
+let selectedAwardItem = null;
+let editingItemId = null;
 
 // ===== Auth =====
 auth.onAuthStateChanged(user => {
@@ -134,6 +138,14 @@ function initListeners() {
             achievements = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             renderAdminAchievements();
             renderAwardAchievements();
+        });
+
+    // Listen to items
+    db.collection('classes').doc(classId).collection('items')
+        .onSnapshot(snapshot => {
+            items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderAdminItems();
+            renderAwardItems();
         });
 
     // Listen to recent awards for ticker
@@ -234,11 +246,14 @@ function renderGuildHall() {
     grid.innerHTML = students.map(s => {
         const level = getLevel(s.xp || 0);
         const progress = getLevelProgress(s.xp || 0);
+        const equipped = (s.equippedItems || []).map(id => items.find(i => i.id === id)).filter(Boolean);
+        const equippedHtml = equipped.length ? `<div class="equipped-items">${equipped.map(i => i.icon).join('')}</div>` : '';
         return `<div class="student-card" data-student-id="${s.id}">
             <div class="avatar-container">${renderAvatar(s.avatar)}</div>
             <div class="student-name">${s.name}</div>
             <div class="student-level">Lv.${level} ${LEVEL_NAMES[level]}</div>
             <div class="xp-bar"><div class="xp-fill" style="width:${progress}%"></div></div>
+            ${equippedHtml}
         </div>`;
     }).join('');
 
@@ -277,6 +292,9 @@ async function showHeroProfile(studentId) {
     // Render active power-ups
     const activePowerUps = badges.filter(b => b.achievement?.powerUp && b.powerUpRedeemed === false);
     const isTeacher = !!currentUser;
+
+    // Render inventory
+    renderHeroInventory(student);
 
     document.getElementById('hero-powerups').innerHTML = activePowerUps.length ? activePowerUps.map(b => {
         const a = b.achievement;
@@ -693,6 +711,214 @@ function renderAvatarBuilder() {
                 currentAvatar[type] = value;
             }
             renderAvatarBuilder();
+        });
+    });
+}
+
+// ===== Admin: Items =====
+function renderAdminItems() {
+    document.getElementById('admin-item-list').innerHTML = items.map(i => {
+        return `<div class="list-item">
+            <div class="list-item-info">
+                <span style="font-size:1.5rem">${i.icon}</span>
+                <span>${i.name}</span>
+                <span style="color:var(--text-muted);font-size:0.8rem">${i.benefit || ''}</span>
+            </div>
+            <div class="list-item-actions">
+                <button class="btn btn-small" onclick="editItem('${i.id}')">✏️</button>
+                <button class="btn btn-small btn-danger" onclick="deleteItem('${i.id}')">🗑️</button>
+            </div>
+        </div>`;
+    }).join('') || '<p style="color:var(--text-muted)">No loot items defined yet.</p>';
+}
+
+document.getElementById('add-item-btn').addEventListener('click', () => {
+    editingItemId = null;
+    document.getElementById('item-modal-title').textContent = '🎒 New Loot Item';
+    document.getElementById('item-name').value = '';
+    document.getElementById('item-icon').value = '';
+    document.getElementById('item-desc').value = '';
+    document.getElementById('item-benefit').value = '';
+    document.getElementById('item-modal').classList.add('active');
+});
+
+document.getElementById('close-item-modal').addEventListener('click', () => {
+    document.getElementById('item-modal').classList.remove('active');
+});
+
+window.editItem = function(id) {
+    const i = items.find(x => x.id === id);
+    if (!i) return;
+    editingItemId = id;
+    document.getElementById('item-modal-title').textContent = '✏️ Edit Item';
+    document.getElementById('item-name').value = i.name;
+    document.getElementById('item-icon').value = i.icon;
+    document.getElementById('item-desc').value = i.description || '';
+    document.getElementById('item-benefit').value = i.benefit || '';
+    document.getElementById('item-modal').classList.add('active');
+};
+
+window.deleteItem = async function(id) {
+    if (!confirm('Delete this item?')) return;
+    await db.collection('classes').doc(classId).collection('items').doc(id).delete();
+};
+
+document.getElementById('item-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('item-name').value.trim();
+    const icon = document.getElementById('item-icon').value.trim();
+    if (!name || !icon) {
+        alert('⚠️ Item name and icon are required.');
+        return;
+    }
+
+    const data = {
+        name,
+        icon,
+        description: document.getElementById('item-desc').value.trim(),
+        benefit: document.getElementById('item-benefit').value.trim()
+    };
+
+    try {
+        if (editingItemId) {
+            await db.collection('classes').doc(classId).collection('items').doc(editingItemId).update(data);
+        } else {
+            await db.collection('classes').doc(classId).collection('items').add(data);
+        }
+        document.getElementById('item-modal').classList.remove('active');
+    } catch (err) {
+        console.error('Save item error:', err);
+        alert('Error saving: ' + err.message);
+    }
+});
+
+// ===== Award Item Panel =====
+function renderAwardItems() {
+    document.getElementById('award-item-grid').innerHTML = items.map(i => {
+        const sel = selectedAwardItem === i.id ? 'selected' : '';
+        return `<div class="award-chip ${sel}" data-item-id="${i.id}">${i.icon} ${i.name}</div>`;
+    }).join('');
+
+    document.querySelectorAll('#award-item-grid .award-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            selectedAwardItem = chip.dataset.itemId;
+            renderAwardItems();
+            updateAwardItemButton();
+        });
+    });
+
+    // Render student grid for item awards
+    document.getElementById('award-item-student-grid').innerHTML = students.map(s => {
+        const sel = selectedAwardItemStudents.has(s.id) ? 'selected' : '';
+        return `<div class="award-chip ${sel}" data-student-id="${s.id}">${s.name}</div>`;
+    }).join('');
+
+    document.querySelectorAll('#award-item-student-grid .award-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            const id = chip.dataset.studentId;
+            if (selectedAwardItemStudents.has(id)) selectedAwardItemStudents.delete(id);
+            else selectedAwardItemStudents.add(id);
+            renderAwardItems();
+            updateAwardItemButton();
+        });
+    });
+}
+
+function updateAwardItemButton() {
+    const btn = document.getElementById('award-item-btn');
+    btn.disabled = !(selectedAwardItemStudents.size > 0 && selectedAwardItem);
+}
+
+document.getElementById('award-item-btn').addEventListener('click', async () => {
+    if (!selectedAwardItem || selectedAwardItemStudents.size === 0) return;
+
+    const item = items.find(i => i.id === selectedAwardItem);
+    if (!item) return;
+
+    if (selectedAwardItemStudents.size > 1) {
+        if (!confirm(`Give "${item.icon} ${item.name}" to ${selectedAwardItemStudents.size} students?`)) return;
+    }
+
+    try {
+        const batch = db.batch();
+        for (const studentId of selectedAwardItemStudents) {
+            const studentRef = db.collection('classes').doc(classId).collection('students').doc(studentId);
+            batch.update(studentRef, {
+                inventory: firebase.firestore.FieldValue.arrayUnion(selectedAwardItem)
+            });
+        }
+        await batch.commit();
+        fireConfetti();
+        selectedAwardItemStudents.clear();
+        selectedAwardItem = null;
+        renderAwardItems();
+        updateAwardItemButton();
+    } catch (err) {
+        console.error('Award item error:', err);
+        alert('Error giving loot: ' + err.message);
+    }
+});
+
+// ===== Inventory rendering in Hero Profile =====
+function renderHeroInventory(student) {
+    const inventory = (student.inventory || []).map(id => items.find(i => i.id === id)).filter(Boolean);
+    const equipped = student.equippedItems || [];
+    const isTeacher = !!currentUser;
+
+    document.getElementById('hero-inventory').innerHTML = inventory.length ? inventory.map(i => {
+        const isEquipped = equipped.includes(i.id);
+        const equippedBadge = isEquipped ? '<span class="equipped-badge">EQUIPPED</span>' : '';
+        const equipBtn = isTeacher ? (isEquipped
+            ? `<button class="btn btn-small unequip-btn" data-item-id="${i.id}">Unequip</button>`
+            : `<button class="btn btn-small equip-btn" data-item-id="${i.id}" ${equipped.length >= 2 && !isEquipped ? 'disabled title="2 slots max"' : ''}>Equip</button>`
+        ) : '';
+        const removeBtn = isTeacher ? `<button class="btn btn-small btn-danger remove-item-btn" data-item-id="${i.id}">✕</button>` : '';
+        return `<div class="item-card ${isEquipped ? 'equipped' : ''}">
+            ${equippedBadge}
+            <div class="item-icon">${i.icon}</div>
+            <div class="item-name">${i.name}</div>
+            ${i.benefit ? `<div class="item-benefit">${i.benefit}</div>` : ''}
+            <div class="item-actions">${equipBtn}${removeBtn}</div>
+        </div>`;
+    }).join('') : '<p style="color:var(--text-muted)">No loot collected yet!</p>';
+
+    // Attach equip/unequip/remove handlers
+    document.querySelectorAll('.equip-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const itemId = btn.dataset.itemId;
+            const current = student.equippedItems || [];
+            if (current.length >= 2) { alert('Only 2 equip slots! Unequip something first.'); return; }
+            try {
+                await db.collection('classes').doc(classId).collection('students').doc(currentHeroStudentId)
+                    .update({ equippedItems: firebase.firestore.FieldValue.arrayUnion(itemId) });
+                showHeroProfile(currentHeroStudentId);
+            } catch (err) { alert('Error: ' + err.message); }
+        });
+    });
+
+    document.querySelectorAll('.unequip-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const itemId = btn.dataset.itemId;
+            try {
+                await db.collection('classes').doc(classId).collection('students').doc(currentHeroStudentId)
+                    .update({ equippedItems: firebase.firestore.FieldValue.arrayRemove(itemId) });
+                showHeroProfile(currentHeroStudentId);
+            } catch (err) { alert('Error: ' + err.message); }
+        });
+    });
+
+    document.querySelectorAll('.remove-item-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const itemId = btn.dataset.itemId;
+            if (!confirm('Remove this item from inventory?')) return;
+            try {
+                await db.collection('classes').doc(classId).collection('students').doc(currentHeroStudentId)
+                    .update({
+                        inventory: firebase.firestore.FieldValue.arrayRemove(itemId),
+                        equippedItems: firebase.firestore.FieldValue.arrayRemove(itemId)
+                    });
+                showHeroProfile(currentHeroStudentId);
+            } catch (err) { alert('Error: ' + err.message); }
         });
     });
 }
