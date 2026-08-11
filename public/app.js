@@ -70,17 +70,6 @@ document.getElementById('close-login-modal').addEventListener('click', () => {
     document.getElementById('login-modal').classList.remove('active');
 });
 
-document.getElementById('google-login-btn').addEventListener('click', async () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    try {
-        await auth.signInWithPopup(provider);
-        document.getElementById('login-modal').classList.remove('active');
-        document.getElementById('login-error').textContent = '';
-    } catch (err) {
-        document.getElementById('login-error').textContent = err.message;
-    }
-});
-
 document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('login-email').value;
