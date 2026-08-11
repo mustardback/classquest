@@ -101,7 +101,107 @@ body {
     overflow: hidden;
     white-space: nowrap;
     min-height: 2rem;
+    position: relative;
 }
+
+.ticker-inner {
+    display: inline-block;
+    animation: ticker-scroll 30s linear infinite;
+    padding-left: 100%;
+}
+
+.ticker:hover .ticker-inner { animation-play-state: paused; }
+
+@keyframes ticker-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+}
+
+/* ===== Card Entrance Animation ===== */
+@keyframes card-pop-in {
+    0% { opacity: 0; transform: translateY(20px) scale(0.95); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.student-card {
+    animation: card-pop-in 0.4s ease forwards;
+    opacity: 0;
+}
+
+.student-card:nth-child(1) { animation-delay: 0.05s; }
+.student-card:nth-child(2) { animation-delay: 0.1s; }
+.student-card:nth-child(3) { animation-delay: 0.15s; }
+.student-card:nth-child(4) { animation-delay: 0.2s; }
+.student-card:nth-child(5) { animation-delay: 0.25s; }
+.student-card:nth-child(6) { animation-delay: 0.3s; }
+.student-card:nth-child(7) { animation-delay: 0.35s; }
+.student-card:nth-child(8) { animation-delay: 0.4s; }
+.student-card:nth-child(9) { animation-delay: 0.45s; }
+.student-card:nth-child(10) { animation-delay: 0.5s; }
+
+/* ===== Level Up Animation ===== */
+@keyframes level-up-glow {
+    0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+    50% { box-shadow: 0 0 30px 10px rgba(245, 158, 11, 0.4); }
+    100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+
+@keyframes level-up-bounce {
+    0%, 100% { transform: translateY(0); }
+    25% { transform: translateY(-8px); }
+    50% { transform: translateY(0); }
+    75% { transform: translateY(-4px); }
+}
+
+.level-up-effect {
+    animation: level-up-glow 1.5s ease, level-up-bounce 0.8s ease;
+}
+
+/* ===== Award Pop Animation ===== */
+@keyframes award-pop {
+    0% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.badge-card.just-awarded {
+    animation: award-pop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* ===== XP Bar Pulse ===== */
+@keyframes xp-pulse {
+    0% { filter: brightness(1); }
+    50% { filter: brightness(1.5); }
+    100% { filter: brightness(1); }
+}
+
+.xp-fill.gaining { animation: xp-pulse 0.6s ease 3; }
+
+/* ===== Button Hover Polish ===== */
+.btn { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+.btn-primary:active { transform: translateY(1px) scale(0.98); }
+
+/* ===== Modal Animation ===== */
+@keyframes modal-fade-in {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@keyframes modal-slide-up {
+    0% { opacity: 0; transform: translateY(30px) scale(0.95); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal.active { animation: modal-fade-in 0.2s ease; }
+.modal.active .modal-content { animation: modal-slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+/* ===== Nav Transition ===== */
+.nav-btn { transition: all 0.2s ease; }
+.admin-tab { transition: all 0.2s ease; }
+.award-chip { transition: all 0.15s ease; }
+.award-chip.selected { transform: scale(1.05); }
+
+/* ===== Student Card Hover Polish ===== */
 
 /* ===== Student Grid ===== */
 .student-grid {
@@ -586,6 +686,35 @@ body {
     pointer-events: none;
     z-index: 9999;
 }
+
+/* ===== Level Up Toast ===== */
+.level-up-toast {
+    position: fixed;
+    top: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 10px 40px rgba(124, 92, 252, 0.5);
+    z-index: 10000;
+    opacity: 0;
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    font-family: var(--font);
+}
+
+.level-up-toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.level-up-icon { font-size: 2rem; animation: level-up-bounce 0.8s ease infinite; }
+.level-up-text { font-size: 0.95rem; }
+.level-up-text span { color: rgba(255,255,255,0.8); font-size: 0.8rem; }
 
 /* ===== Responsive ===== */
 @media (max-width: 768px) {

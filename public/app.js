@@ -191,7 +191,7 @@ function getLevelProgress(xp) {
 function renderTicker() {
     const ticker = document.getElementById('achievement-ticker');
     if (!recentAwards.length) {
-        ticker.textContent = '✨ No quests completed yet — adventure awaits!';
+        ticker.innerHTML = '<span class="ticker-inner">✨ No quests completed yet — adventure awaits!</span>';
         return;
     }
     const items = recentAwards.map(award => {
@@ -200,7 +200,8 @@ function renderTicker() {
         if (!student || !achievement) return '';
         return `${achievement.icon} ${student.name} completed "${achievement.name}"!`;
     }).filter(Boolean);
-    ticker.textContent = items.join('  ⚔️  ') || '✨ Adventure awaits!';
+    const text = items.join('  ⚔️  ') || '✨ Adventure awaits!';
+    ticker.innerHTML = `<span class="ticker-inner">${text}  ⚔️  ${text}</span>`;
 }
 
 function renderAvatar(avatar, size = 80) {
@@ -630,8 +631,29 @@ document.getElementById('award-btn').addEventListener('click', async () => {
     }
 
     try {
+        // Track current levels for level-up detection
+        const prevLevels = {};
+        for (const studentId of selectedAwardStudents) {
+            const student = students.find(s => s.id === studentId);
+            if (student) prevLevels[studentId] = getLevel(student.xp || 0);
+        }
+
         await batch.commit();
         fireConfetti();
+
+        // Check for level-ups after XP is applied
+        setTimeout(() => {
+            for (const studentId of Object.keys(prevLevels)) {
+                const student = students.find(s => s.id === studentId);
+                if (student) {
+                    const newLevel = getLevel(student.xp || 0);
+                    if (newLevel > prevLevels[studentId]) {
+                        fireLevelUp(student.name, newLevel);
+                    }
+                }
+            }
+        }, 1000);
+
         selectedAwardStudents.clear();
         selectedAwardAchievement = null;
         renderAwardStudents();
@@ -961,6 +983,43 @@ function fireConfetti() {
         requestAnimationFrame(animate);
     }
     animate();
+}
+
+// ===== Level Up Celebration =====
+function fireLevelUp(studentName, newLevel) {
+    // Create level-up toast
+    const toast = document.createElement('div');
+    toast.className = 'level-up-toast';
+    toast.innerHTML = `
+        <div class="level-up-icon">⬆️</div>
+        <div class="level-up-text">
+            <strong>${studentName}</strong> reached Level ${newLevel}!
+            <br><span>${LEVEL_NAMES[newLevel]}</span>
+        </div>
+    `;
+    document.body.appendChild(toast);
+
+    // Trigger animation
+    requestAnimationFrame(() => toast.classList.add('show'));
+
+    // Fire extra confetti for level-ups
+    fireConfetti();
+
+    // Remove after animation
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 500);
+    }, 3500);
+
+    // Add glow to student card if visible
+    const cards = document.querySelectorAll('.student-card');
+    cards.forEach(card => {
+        const nameEl = card.querySelector('.student-name');
+        if (nameEl && nameEl.textContent === studentName) {
+            card.classList.add('level-up-effect');
+            setTimeout(() => card.classList.remove('level-up-effect'), 2000);
+        }
+    });
 }
 
 // ===== Init =====
