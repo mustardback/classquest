@@ -64,7 +64,7 @@
     <!-- Quest Master (Teacher Admin) -->
     <section id="quest-master" class="view">
         <div class="admin-tabs">
-            <button class="admin-tab active" data-tab="manage-students">👥 Students</button>
+            <button class="admin-tab active" data-tab="manage-students">👥 Scholars</button>
             <button class="admin-tab" data-tab="manage-achievements">🎖️ Achievements</button>
             <button class="admin-tab" data-tab="manage-items">🎒 Loot</button>
             <button class="admin-tab" data-tab="award-panel">🎁 Award</button>
@@ -72,11 +72,11 @@
             <button class="admin-tab" data-tab="class-settings">⚙️ Settings</button>
         </div>
 
-        <!-- Manage Students Tab -->
+        <!-- Manage Scholars Tab -->
         <div class="admin-panel active" id="manage-students">
             <div class="panel-header">
-                <h2>👥 Manage Students</h2>
-                <button class="btn btn-primary" id="add-student-btn">+ Add Student</button>
+                <h2>👥 Manage Scholars</h2>
+                <button class="btn btn-primary" id="add-student-btn">+ Add Scholar</button>
             </div>
             <div class="student-list" id="admin-student-list"></div>
         </div>
@@ -97,7 +97,7 @@
             </div>
             <div class="award-form">
                 <div class="award-section">
-                    <h3>Select Student(s)</h3>
+                    <h3>Select Scholar(s)</h3>
                     <div class="award-student-grid" id="award-student-grid"></div>
                 </div>
                 <div class="award-section">
@@ -124,7 +124,7 @@
             </div>
             <div class="award-form">
                 <div class="award-section">
-                    <h3>Select Student(s)</h3>
+                    <h3>Select Scholar(s)</h3>
                     <div class="award-student-grid" id="award-item-student-grid"></div>
                 </div>
                 <div class="award-section">
@@ -172,13 +172,13 @@
         </div>
     </div>
 
-    <!-- Add Student Modal -->
+    <!-- Add Scholar Modal -->
     <div class="modal" id="student-modal">
         <div class="modal-content modal-large">
-            <h2 id="student-modal-title">🗡️ New Adventurer</h2>
+            <h2 id="student-modal-title">🗡️ New Scholar</h2>
             <form id="student-form">
                 <label>Name
-                    <input type="text" id="student-name" required placeholder="Enter student name">
+                    <input type="text" id="student-name" required placeholder="Enter scholar name">
                 </label>
                 <div class="avatar-builder">
                     <h3>Build Avatar</h3>
@@ -216,7 +216,7 @@
                         </div>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary" style="margin-top:1rem;width:100%;">Save Adventurer</button>
+                <button type="submit" class="btn btn-primary" style="margin-top:1rem;width:100%;">Save Scholar</button>
             </form>
             <button class="modal-close" id="close-student-modal">✕</button>
         </div>

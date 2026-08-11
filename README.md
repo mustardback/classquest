@@ -28,7 +28,7 @@ A gamified achievement tracker for elementary classrooms. Students become advent
 2. Click **🔐 Teacher Login** → Sign in with Google
 3. Click **🗝️ Quest Master** to access the admin panel
 
-#### Managing Students
+#### Managing Scholars
 1. Go to Quest Master → **👥 Students** tab
 2. Click **+ Add Student**
 3. Enter the student's name

@@ -148,16 +148,21 @@ function initListeners() {
             renderAwardItems();
         });
 
-    // Listen to recent awards for ticker
-    db.collectionGroup('awards')
+    // Listen to recent awards for ticker (using class-level recent_awards doc)
+    // We'll update the ticker from student snapshot changes instead
+    // since collectionGroup queries require indexes
+    db.collection('classes').doc(classId).collection('recent_awards')
         .orderBy('awardedAt', 'desc')
         .limit(10)
         .onSnapshot(snapshot => {
             recentAwards = snapshot.docs.map(doc => ({
                 id: doc.id,
-                studentId: doc.ref.parent.parent.id,
                 ...doc.data()
             }));
+            renderTicker();
+        }, err => {
+            // Fallback if collection doesn't exist yet
+            console.log('Ticker query fallback:', err.message);
             renderTicker();
         });
 
@@ -195,10 +200,10 @@ function renderTicker() {
         return;
     }
     const items = recentAwards.map(award => {
-        const student = students.find(s => s.id === award.studentId);
+        const studentName = award.studentName || 'A scholar';
         const achievement = achievements.find(a => a.id === award.achievementId);
-        if (!student || !achievement) return '';
-        return `${achievement.icon} ${student.name} completed "${achievement.name}"!`;
+        if (!achievement) return '';
+        return `${achievement.icon} ${studentName} completed "${achievement.name}"!`;
     }).filter(Boolean);
     const text = items.join('  ⚔️  ') || '✨ Adventure awaits!';
     ticker.innerHTML = `<span class="ticker-inner">${text}  ⚔️  ${text}</span>`;
@@ -391,12 +396,12 @@ function renderAdminStudents() {
                 <button class="btn btn-small btn-danger" onclick="deleteStudent('${s.id}')">🗑️</button>
             </div>
         </div>`;
-    }).join('') || '<p style="color:var(--text-muted)">No students yet. Add your first adventurer!</p>';
+    }).join('') || '<p style="color:var(--text-muted)">No scholars yet. Add your first scholar!</p>';
 }
 
 document.getElementById('add-student-btn').addEventListener('click', () => {
     editingStudentId = null;
-    document.getElementById('student-modal-title').textContent = '🗡️ New Adventurer';
+    document.getElementById('student-modal-title').textContent = '🗡️ New Scholar';
     document.getElementById('student-name').value = '';
     currentAvatar = { skinTone: SKIN_TONES[2], hairStyle: "medium", hairColor: HAIR_COLORS[0], eyeStyle: "round", outfit: "knight", accentColor: ACCENT_COLORS[0], accessory1: "none", accessory2: "none" };
     renderAvatarBuilder();
@@ -411,7 +416,7 @@ window.editStudent = function(id) {
     const student = students.find(s => s.id === id);
     if (!student) return;
     editingStudentId = id;
-    document.getElementById('student-modal-title').textContent = '✏️ Edit Adventurer';
+    document.getElementById('student-modal-title').textContent = '✏️ Edit Scholar';
     document.getElementById('student-name').value = student.name;
     currentAvatar = { ...student.avatar } || { skinTone: SKIN_TONES[2], hairStyle: "medium", hairColor: HAIR_COLORS[0], eyeStyle: "round", outfit: "knight", accentColor: ACCENT_COLORS[0], accessory1: "none", accessory2: "none" };
     renderAvatarBuilder();
@@ -420,7 +425,7 @@ window.editStudent = function(id) {
 
 window.deleteStudent = async function(id) {
     const student = students.find(s => s.id === id);
-    if (!confirm(`Remove ${student?.name || 'this adventurer'} from the guild?`)) return;
+    if (!confirm(`Remove ${student?.name || 'this scholar'} from the guild?`)) return;
     await db.collection('classes').doc(classId).collection('students').doc(id).delete();
 };
 
@@ -439,7 +444,7 @@ document.getElementById('student-form').addEventListener('submit', async (e) => 
     // Check for duplicate names
     const duplicate = students.find(s => s.name.toLowerCase() === name.toLowerCase() && s.id !== editingStudentId);
     if (duplicate) {
-        alert('⚠️ An adventurer with that name already exists! Please choose a unique name.');
+        alert('⚠️ A scholar with that name already exists! Please choose a unique name.');
         return;
     }
 
@@ -640,6 +645,18 @@ document.getElementById('award-btn').addEventListener('click', async () => {
 
         await batch.commit();
         fireConfetti();
+
+        // Write to recent_awards for ticker display
+        for (const studentId of selectedAwardStudents) {
+            const student = students.find(s => s.id === studentId);
+            if (student) {
+                db.collection('classes').doc(classId).collection('recent_awards').add({
+                    studentName: student.name,
+                    achievementId: selectedAwardAchievement,
+                    awardedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+        }
 
         // Check for level-ups after XP is applied
         setTimeout(() => {
